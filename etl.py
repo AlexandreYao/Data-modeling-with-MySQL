@@ -1,13 +1,13 @@
 import os
 import glob
-import psycopg2
+import mysql.connector
 import pandas as pd
 from sql_queries import *
 
 
 def process_song_file(cur, filepath):
     """
-    Process songs files and insert records into the Postgres database.
+    Process songs files and insert records into the MySQL database.
     :param cur: cursor reference
     :param filepath: complete file path for the file to load
     """
@@ -31,7 +31,7 @@ def process_song_file(cur, filepath):
 
 def process_log_file(cur, filepath):
     """
-    Process Event log files and insert records into the Postgres database.
+    Process Event log files and insert records into the MySQL database.
     :param cur: cursor reference
     :param filepath: complete file path for the file to load
     """
@@ -45,7 +45,7 @@ def process_log_file(cur, filepath):
     t = pd.Series(df['ts'], index=df.index)
     
     # insert time data records
-    column_labels = ["timestamp", "hour", "day", "weelofyear", "month", "year", "weekday"]
+    column_labels = ["start_time", "hour", "day", "week", "month", "year", "weekday"]
     time_data = []
     for data in t:
         time_data.append([data ,data.hour, data.day, data.weekofyear, data.month, data.year, data.day_name()])
@@ -81,7 +81,7 @@ def process_log_file(cur, filepath):
 
 def process_data(cur, conn, filepath, func):
     """
-    Driver function to load data from songs and event log files into Postgres database.
+    Driver function to load data from songs and event log files into MySQL database.
     :param cur: a database cursor reference
     :param conn: database connection reference
     :param filepath: parent directory where the files exists
@@ -107,9 +107,9 @@ def process_data(cur, conn, filepath, func):
 
 def main():
     """
-    Driver function for loading songs and log data into Postgres database
+    Driver function for loading songs and log data into MySQL database
     """
-    conn = psycopg2.connect("host=127.0.0.1 dbname=sparkifydb user=postgres password=admin")
+    conn = mysql.connector.connect(host="localhost", database="sparkifydb", user="root", password="yourpassword")
     cur = conn.cursor()
 
     process_data(cur, conn, filepath='data/song_data', func=process_song_file)
